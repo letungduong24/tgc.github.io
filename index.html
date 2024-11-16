@@ -1,3 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Show Hào Quang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="wrap">
+        <div class="wrap-panel">
+            <div class="panel">
+                <div class="title">
+                    <h1>Khung ảnh Big Show "Hào Quang"</h1>
+                </div>
+                <div class="controls1">
+                    <div class="upload">
+                        <input type="file" id="uploadPNG" accept="image/png, image/jpeg, image/jpg">
+                    </div>
+                    <button class="btn-control" id="downloadButton" disabled>Tải về</button>
+                </div>
+                <div class="controls2">
+                    <button class="btn-control" id="zoomIn">Phóng to</button>
+                    <button class="btn-control" id="zoomOut">Thu nhỏ</button>
+                    <button class="btn-control" id="rotateLeft">Quay trái</button>
+                    <button class="btn-control" id="rotateRight">Quay phải</button>
+                </div>
+                <div class="download">
+                    
+                </div>
+            </div>
+        </div>
+        <div class="wrap-canvas">
+            <canvas id="canvas"></canvas>
+        </div>    
+    </div>
+    
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const uploadPNG = document.getElementById('uploadPNG');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const downloadButton = document.getElementById('downloadButton');
+            
+            // Nút điều khiển
+            const zoomInButton = document.getElementById('zoomIn');
+            const zoomOutButton = document.getElementById('zoomOut');
+            const rotateLeftButton = document.getElementById('rotateLeft');
+            const rotateRightButton = document.getElementById('rotateRight');
+
+            let pngImage = new Image();
+            let frameImage = new Image();
+            let isPNGUploaded = false;
+
+            // Các biến để điều khiển ảnh PNG
+            let scale = 1;
+            let rotation = 0;
+            let offsetX = 0;
+            let offsetY = 0;
+            let isDragging = false;
+            let startX, startY;
+
+            // Tải ảnh khung từ đường dẫn đã cho
+            frameImage.src = 'Khungavt1.png';
+            frameImage.onload = function () {
+                initializeCanvas();
+            };
+
+            // Thiết lập kích thước canvas cố định theo kích thước khung
+            function initializeCanvas() {
+                canvas.width = frameImage.width;
+                canvas.height = frameImage.height;
+                drawImages();
+            }
+
+            // Khi người dùng tải ảnh PNG đã xóa nền lên
+            // Khi người dùng tải ảnh lên
+// Khi người dùng tải ảnh lên
+uploadPNG.addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];  // Danh sách các loại file hợp lệ
+    if (file && validTypes.includes(file.type)) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            pngImage.src = e.target.result;
+            pngImage.onload = () => {
+                isPNGUploaded = true;
+
+                // Tính toán tỷ lệ tự động phóng to ảnh để vừa với khung
+                const scaleX = canvas.width / pngImage.width;
+                const scaleY = canvas.height / pngImage.height;
+                scale = Math.min(scaleX, scaleY);  // Chọn tỷ lệ nhỏ hơn để ảnh vừa với khung
+
+                // Cập nhật vị trí căn giữa
+                offsetX = (canvas.width - pngImage.width * scale) / 2;
+                offsetY = (canvas.height - pngImage.height * scale) / 2;
+
+                drawImages();
+                downloadButton.disabled = false;
+            };
+        };
+        reader.readAsDataURL(file);
+    } else {
+        alert('Vui lòng chọn file PNG, JPG hoặc JPEG.');
+    }
+});
+
+// Vẽ ảnh PNG và ảnh khung
+function drawImages() {
+    // Xóa canvas trước khi vẽ lại
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Nếu ảnh PNG đã được tải lên, xử lý zoom và xoay
+    if (isPNGUploaded) {
+        ctx.save();
+        ctx.translate(offsetX + pngImage.width * scale / 2, offsetY + pngImage.height * scale / 2);
+        ctx.rotate((rotation * Math.PI) / 180);
+        ctx.scale(scale, scale);
+        ctx.drawImage(pngImage, -pngImage.width / 2, -pngImage.height / 2);
+        ctx.restore();
+    }
+
+    // Vẽ ảnh khung sau cùng để nó nằm trên ảnh PNG
+    ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
+}
+
+// Xử lý zoom
+zoomInButton.addEventListener('click', function () {
+    scale += 0.1;  // Phóng to
+    drawImages();
+});
+
+zoomOutButton.addEventListener('click', function () {
+    if (scale > 0.1) {  // Thu nhỏ
+        scale -= 0.1;
+        drawImages();
+    }
+});
+
+
+
+            // Tải ảnh kết quả xuống
+            downloadButton.addEventListener('click', function () {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'HaoQuang.png';
+                link.click();
+            });
+
+            // Xử lý zoom
+            zoomInButton.addEventListener('click', function () {
+                scale += 0.1;
+                drawImages();
+            });
+
+            zoomOutButton.addEventListener('click', function () {
+                if (scale > 0.1) {
+                    scale -= 0.1;
+                    drawImages();
+                }
+            });
+
+            // Xử lý xoay ảnh
+            rotateLeftButton.addEventListener('click', function () {
+                rotation -= 15;
+                drawImages();
+            });
+
+            rotateRightButton.addEventListener('click', function () {
+                rotation += 15;
+                drawImages();
+            });
+
+            // Xử lý kéo ảnh PNG
 // Xử lý kéo ảnh PNG bằng chuột
 canvas.addEventListener('mousedown', function (event) {
     isDragging = true;
@@ -44,3 +222,7 @@ canvas.addEventListener('touchmove', function (event) {
 canvas.addEventListener('touchend', function () {
     isDragging = false;
 });
+        });
+    </script>
+</body>
+</html>
