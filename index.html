@@ -1,56 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big Show Hào Quang</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="Khungavt1.png" as="image">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-</head>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big Show Hào Quang</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-    <!-- Preload hình ảnh -->
-    <link rel="preload" href="Khungavt1.png" as="image">
-</head>
-<body>
-    <div class="wrap">
-        <div class="wrap-panel">
-            <div class="panel">
-                <div class="title">
-                    <h1>Khung ảnh Big Show "Hào Quang"</h1>
-                </div>
-                <div class="controls1">
-                    <div class="upload">
-                        <input type="file" id="uploadPNG" accept="image/png, image/jpeg, image/jpg">
-                    </div>
-                    <button class="btn-control" id="downloadButton" disabled>Tải về</button>
-                </div>
-                <div class="controls2">
-                    <button class="btn-control" id="zoomIn">Phóng to</button>
-                    <button class="btn-control" id="zoomOut">Thu nhỏ</button>
-                    <button class="btn-control" id="rotateLeft">Quay trái</button>
-                    <button class="btn-control" id="rotateRight">Quay phải</button>
-                </div>
-            </div>
-        </div>
-        <div class="wrap-canvas">
-            <!-- Thêm canvas với kích thước cố định -->
-            <canvas id="canvas" width="800" height="600"></canvas>
-        </div>
-    </div>
-</body>
-</html>
-
-<script>
 document.addEventListener('DOMContentLoaded', function () {
     const uploadPNG = document.getElementById('uploadPNG');
     const canvas = document.getElementById('canvas');
@@ -86,8 +33,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Thiết lập kích thước canvas theo kích thước khung
     function initializeCanvas() {
-        canvas.width = frameImage.width;
-        canvas.height = frameImage.height;
+        // Điều chỉnh kích thước canvas theo độ phân giải của thiết bị
+        const scaleFactor = window.devicePixelRatio || 1;
+        canvas.width = frameImage.width * scaleFactor;
+        canvas.height = frameImage.height * scaleFactor;
+        ctx.scale(scaleFactor, scaleFactor); // Tăng cường độ phân giải canvas để phù hợp với màn hình di động
         drawImages();
     }
 
@@ -202,5 +152,3 @@ document.addEventListener('DOMContentLoaded', function () {
         isDragging = false;
     });
 });
-
-</script>
