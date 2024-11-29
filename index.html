@@ -35,7 +35,11 @@
         </div>
         <div class="wrap-canvas">
             <canvas id="canvas"></canvas>
-        </div>    
+        </div>
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+        </div>
+
     </div>
     
     
@@ -82,25 +86,27 @@
 // Khi người dùng tải ảnh lên
 uploadPNG.addEventListener('change', function (event) {
     const file = event.target.files[0];
-    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];  // Danh sách các loại file hợp lệ
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const loadingElement = document.getElementById('loading');
+
     if (file && validTypes.includes(file.type)) {
+        loadingElement.classList.remove('hidden'); // Hiển thị loading
+
         const reader = new FileReader();
         reader.onload = function (e) {
             pngImage.src = e.target.result;
             pngImage.onload = () => {
                 isPNGUploaded = true;
 
-                // Tính toán tỷ lệ tự động phóng to ảnh để vừa với khung
                 const scaleX = canvas.width / pngImage.width;
                 const scaleY = canvas.height / pngImage.height;
-                scale = Math.min(scaleX, scaleY);  // Chọn tỷ lệ nhỏ hơn để ảnh vừa với khung
-
-                // Cập nhật vị trí căn giữa
+                scale = Math.min(scaleX, scaleY);
                 offsetX = (canvas.width - pngImage.width * scale) / 2;
                 offsetY = (canvas.height - pngImage.height * scale) / 2;
 
                 drawImages();
                 downloadButton.disabled = false;
+                loadingElement.classList.add('hidden'); // Ẩn loading
             };
         };
         reader.readAsDataURL(file);
@@ -108,6 +114,7 @@ uploadPNG.addEventListener('change', function (event) {
         alert('Vui lòng chọn file PNG, JPG hoặc JPEG.');
     }
 });
+
 
 // Vẽ ảnh PNG và ảnh khung
 function drawImages() {
@@ -145,35 +152,18 @@ zoomOutButton.addEventListener('click', function () {
 
             // Tải ảnh kết quả xuống
             downloadButton.addEventListener('click', function () {
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL('image/png');
-                link.download = 'HaoQuang.png';
-                link.click();
-            });
+    const loadingElement = document.getElementById('loading');
+    loadingElement.classList.remove('hidden'); // Hiển thị loading
 
-            // Xử lý zoom
-            zoomInButton.addEventListener('click', function () {
-                scale += 0.1;
-                drawImages();
-            });
+    setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'HaoQuang.png';
+        link.click();
+        loadingElement.classList.add('hidden'); // Ẩn loading sau khi tải
+    }, 500); // Giả lập độ trễ 500ms để tải xuống
+});
 
-            zoomOutButton.addEventListener('click', function () {
-                if (scale > 0.1) {
-                    scale -= 0.1;
-                    drawImages();
-                }
-            });
-
-            // Xử lý xoay ảnh
-            rotateLeftButton.addEventListener('click', function () {
-                rotation -= 15;
-                drawImages();
-            });
-
-            rotateRightButton.addEventListener('click', function () {
-                rotation += 15;
-                drawImages();
-            });
 
             // Xử lý kéo ảnh PNG
 // Xử lý kéo ảnh PNG bằng chuột
