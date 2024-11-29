@@ -1,154 +1,341 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const uploadPNG = document.getElementById('uploadPNG');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const downloadButton = document.getElementById('downloadButton');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Show Hào Quang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="Khungavt1.png" as="image">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Show Hào Quang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <!-- Preload hình ảnh -->
+    <link rel="preload" href="Khungavt1.png" as="image">
+    <style>
+        html{
+            font-family: "Open Sans", sans-serif;
+            background: rgb(58,175,174);
+            background: radial-gradient(circle, rgba(58,175,174,1) 0%, rgba(214,245,245,1) 0%, rgba(255,255,255,1) 97%);
+        }
+        #canvas {
+            border: 1px solid #000;
+            cursor: move;
+            max-width: 585px;
+            max-height: 800px;
+            padding: 0;
+            margin: 0;
+            border-radius: 30px;
+        }
 
-    // Nút điều khiển
-    const zoomInButton = document.getElementById('zoomIn');
-    const zoomOutButton = document.getElementById('zoomOut');
-    const rotateLeftButton = document.getElementById('rotateLeft');
-    const rotateRightButton = document.getElementById('rotateRight');
+        .controls {
+            margin-top: 10px;
+            }
 
-    let pngImage = new Image();
-    let frameImage = new Image();
-    let isPNGUploaded = false;
+        .wrap{
+            display: flex;
+            justify-content: space-around;
+            height: 97vh;
+        }
 
-    // Các biến để điều khiển ảnh PNG
-    let scale = 1;
-    let rotation = 0;
-    let offsetX = 0;
-    let offsetY = 0;
-    let isDragging = false;
-    let dragStartX, dragStartY;
+        .wrap-panel{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    // Biến lưu ảnh canvas dưới dạng Blob
-    let cachedImageBlob = null;
+        .wrap-canvas{
+            display: flex;
+            align-items: center;
+        }
 
-    // Tải ảnh khung từ đường dẫn (có thêm cache)
-    frameImage.src = 'Khungavt1.png?v=1';
-    frameImage.onload = function () {
-        initializeCanvas();
-    };
+        .panel{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    // Thiết lập kích thước canvas theo kích thước khung
-    function initializeCanvas() {
-        // Điều chỉnh kích thước canvas theo độ phân giải của thiết bị
-        const scaleFactor = window.devicePixelRatio || 1;
-        canvas.width = frameImage.width * scaleFactor;
-        canvas.height = frameImage.height * scaleFactor;
-        ctx.scale(scaleFactor, scaleFactor); // Tăng cường độ phân giải canvas để phù hợp với màn hình di động
-        drawImages();
-    }
+        .controls1{
+            display: flex;
+            justify-content: center;
+        }
 
-    // Khi người dùng tải ảnh PNG đã xóa nền lên
-    uploadPNG.addEventListener('change', function (event) {
-        const file = event.target.files[0];
-        if (file && ['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                pngImage.src = e.target.result;
-                pngImage.onload = () => {
-                    isPNGUploaded = true;
+        .download{
+            display: flex;
+            justify-content: center;
+        }
 
-                    // Tự động căn chỉnh ảnh vào khung
-                    const scaleX = canvas.width / pngImage.width;
-                    const scaleY = canvas.height / pngImage.height;
-                    scale = Math.min(scaleX, scaleY);
+        .controls2{
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            cursor: pointer;
 
-                    offsetX = (canvas.width - pngImage.width * scale) / 2;
-                    offsetY = (canvas.height - pngImage.height * scale) / 2;
+        }
 
-                    drawImages();
-                    downloadButton.disabled = false;
+        .btn-control{
+            padding: 10px 15px;
+            background-color: #2596be;
+            border: none;
+            margin: 5px;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .upload{
+            display: flex;
+            align-items: center;
+        }
+
+        .title{
+            display: flex;
+            justify-content: center;
+        }
+
+        @media screen and (min-width: 376px) and (max-width: 820px) {
+            .wrap{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 97vh;
+            }
+
+            #canvas {
+                border: 1px solid #000;
+                cursor: move;
+                max-width: 350px;
+                max-height: 800px;
+                padding: 0;
+                margin: 0;
+                border-radius: 30px;
+            }
+            .title{
+                display: flex;
+                justify-content: center;
+                font-size: 11px;
+            }
+        }
+
+        @media screen and (max-width: 375px) {
+            .wrap{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 97vh;
+            }
+
+            #canvas {
+                border: 1px solid #000;
+                cursor: move;
+                max-width: 350px;
+                max-height: 800px;
+                padding: 0;
+                margin: 0;
+                border-radius: 30px;
+            }
+            .title{
+                display: flex;
+                justify-content: center;
+                font-size: 11px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+        <div class="wrap">
+        <div class="wrap-panel">
+            <div class="panel">
+                <div class="title">
+                    <h1>Khung ảnh Big Show "Hào Quang"</h1>
+                </div>
+                <div class="controls1">
+                    <div class="upload">
+                        <input type="file" id="uploadPNG" accept="image/png, image/jpeg, image/jpg">
+                    </div>
+                    <button class="btn-control" id="downloadButton" disabled>Tải về</button>
+                </div>
+                <div class="controls2">
+                    <button class="btn-control" id="zoomIn">Phóng to</button>
+                    <button class="btn-control" id="zoomOut">Thu nhỏ</button>
+                    <button class="btn-control" id="rotateLeft">Quay trái</button>
+                    <button class="btn-control" id="rotateRight">Quay phải</button>
+                </div>
+            </div>
+        </div>
+        <div class="wrap-canvas">
+            <!-- Thêm canvas với kích thước cố định -->
+            <canvas id="canvas" width="800" height="600"></canvas>
+        </div>
+    </div>
+</body>
+</html>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const uploadPNG = document.getElementById('uploadPNG');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const downloadButton = document.getElementById('downloadButton');
+
+        // Nút điều khiển
+        const zoomInButton = document.getElementById('zoomIn');
+        const zoomOutButton = document.getElementById('zoomOut');
+        const rotateLeftButton = document.getElementById('rotateLeft');
+        const rotateRightButton = document.getElementById('rotateRight');
+
+        let pngImage = new Image();
+        let frameImage = new Image();
+        let isPNGUploaded = false;
+
+        // Các biến để điều khiển ảnh PNG
+        let scale = 1;
+        let rotation = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
+        let dragStartX, dragStartY;
+
+        // Biến lưu ảnh canvas dưới dạng Blob
+        let cachedImageBlob = null;
+
+        // Lưu trữ ảnh khung từ đường dẫn (sử dụng lazy loading hoặc preload)
+        frameImage.src = 'Khungavt1.png?v=1';
+        frameImage.onload = function () {
+            initializeCanvas();
+        };
+
+        // Thiết lập kích thước canvas theo kích thước khung
+        function initializeCanvas() {
+            canvas.width = frameImage.width;
+            canvas.height = frameImage.height;
+            drawImages();
+        }
+
+        // Khi người dùng tải ảnh PNG đã xóa nền lên
+        uploadPNG.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file && ['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    pngImage.src = e.target.result;
+                    pngImage.onload = () => {
+                        isPNGUploaded = true;
+
+                        // Tự động căn chỉnh ảnh vào khung
+                        const scaleX = canvas.width / pngImage.width;
+                        const scaleY = canvas.height / pngImage.height;
+                        scale = Math.min(scaleX, scaleY);
+
+                        offsetX = (canvas.width - pngImage.width * scale) / 2;
+                        offsetY = (canvas.height - pngImage.height * scale) / 2;
+
+                        drawImages();
+                        downloadButton.disabled = false;
+                    };
                 };
-            };
-            reader.readAsDataURL(file);
-        } else {
-            alert('Vui lòng chọn file PNG, JPG hoặc JPEG.');
+                reader.readAsDataURL(file);
+            } else {
+                alert('Vui lòng chọn file PNG, JPG hoặc JPEG.');
+            }
+        });
+
+        // Vẽ ảnh PNG và ảnh khung
+        function drawImages() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Nếu ảnh PNG đã được tải lên
+            if (isPNGUploaded) {
+                ctx.save();
+                ctx.translate(offsetX + pngImage.width * scale / 2, offsetY + pngImage.height * scale / 2);
+                ctx.rotate((rotation * Math.PI) / 180);
+                ctx.scale(scale, scale);
+                ctx.drawImage(pngImage, -pngImage.width / 2, -pngImage.height / 2);
+                ctx.restore();
+            }
+
+            // Vẽ ảnh khung
+            ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
+
+            // Lưu ảnh canvas dưới dạng Blob khi có thay đổi
+            canvas.toBlob(function(blob) {
+                cachedImageBlob = blob;
+            }, 'image/png');
         }
-    });
 
-    // Vẽ ảnh PNG và ảnh khung
-    function drawImages() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Nếu ảnh PNG đã được tải lên
-        if (isPNGUploaded) {
-            ctx.save();
-            ctx.translate(offsetX + pngImage.width * scale / 2, offsetY + pngImage.height * scale / 2);
-            ctx.rotate((rotation * Math.PI) / 180);
-            ctx.scale(scale, scale);
-            ctx.drawImage(pngImage, -pngImage.width / 2, -pngImage.height / 2);
-            ctx.restore();
-        }
-
-        // Vẽ ảnh khung
-        ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
-
-        // Lưu ảnh canvas dưới dạng Blob khi có thay đổi
-        canvas.toBlob(function(blob) {
-            cachedImageBlob = blob;
-        }, 'image/png');
-    }
-
-    // Zoom và Xoay ảnh
-    zoomInButton.addEventListener('click', () => {
-        scale += 0.1;
-        drawImages();
-    });
-
-    zoomOutButton.addEventListener('click', () => {
-        if (scale > 0.1) {
-            scale -= 0.1;
+        // Zoom và Xoay ảnh
+        zoomInButton.addEventListener('click', () => {
+            scale += 0.1;
             drawImages();
-        }
-    });
+        });
 
-    rotateLeftButton.addEventListener('click', () => {
-        rotation -= 15;
-        drawImages();
-    });
+        zoomOutButton.addEventListener('click', () => {
+            if (scale > 0.1) {
+                scale -= 0.1;
+                drawImages();
+            }
+        });
 
-    rotateRightButton.addEventListener('click', () => {
-        rotation += 15;
-        drawImages();
-    });
-
-    // Tải xuống ảnh (sử dụng Blob)
-    downloadButton.addEventListener('click', () => {
-        if (cachedImageBlob) {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(cachedImageBlob);
-            link.download = 'HaoQuang.png';
-            link.click();
-        } else {
-            alert('Chưa có ảnh để tải xuống!');
-        }
-    });
-
-    // Xử lý di chuyển ảnh
-    canvas.addEventListener('mousedown', function (e) {
-        if (isPNGUploaded) {
-            isDragging = true;
-            dragStartX = e.offsetX - offsetX;
-            dragStartY = e.offsetY - offsetY;
-        }
-    });
-
-    canvas.addEventListener('mousemove', function (e) {
-        if (isDragging) {
-            offsetX = e.offsetX - dragStartX;
-            offsetY = e.offsetY - dragStartY;
+        rotateLeftButton.addEventListener('click', () => {
+            rotation -= 15;
             drawImages();
-        }
-    });
+        });
 
-    canvas.addEventListener('mouseup', function () {
-        isDragging = false;
-    });
+        rotateRightButton.addEventListener('click', () => {
+            rotation += 15;
+            drawImages();
+        });
 
-    canvas.addEventListener('mouseleave', function () {
-        isDragging = false;
+        // Tải xuống ảnh (sử dụng Blob)
+        downloadButton.addEventListener('click', () => {
+            if (cachedImageBlob) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(cachedImageBlob);
+                link.download = 'HaoQuang.png';
+                link.click();
+            } else {
+                alert('Chưa có ảnh để tải xuống!');
+            }
+        });
+
+        // Xử lý di chuyển ảnh
+        canvas.addEventListener('mousedown', function (e) {
+            if (isPNGUploaded) {
+                isDragging = true;
+                dragStartX = e.offsetX - offsetX;
+                dragStartY = e.offsetY - offsetY;
+            }
+        });
+
+        canvas.addEventListener('mousemove', function (e) {
+            if (isDragging) {
+                offsetX = e.offsetX - dragStartX;
+                offsetY = e.offsetY - dragStartY;
+                drawImages();
+            }
+        });
+
+        canvas.addEventListener('mouseup', function () {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('mouseleave', function () {
+            isDragging = false;
+        });
     });
-});
+    </script>
